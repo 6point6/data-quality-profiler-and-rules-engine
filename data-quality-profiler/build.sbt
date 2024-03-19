@@ -22,6 +22,9 @@ libraryDependencies += "org.apache.hadoop" % "hadoop-aws" % sparkVersion % "prov
 
 libraryDependencies += "com.crealytics" %% "spark-excel" % "0.14.0"
 
+dependencyOverrides += "org.apache.commons" % "commons-compress" % "1.26.0"
+dependencyOverrides += "commons-io" % "commons-io" % "2.8.0"
+
 libraryDependencies += "org.rogach" %% "scallop" % "4.0.4"
 
 libraryDependencies += "org.apache.logging.log4j" % "log4j" % "2.16.0"
