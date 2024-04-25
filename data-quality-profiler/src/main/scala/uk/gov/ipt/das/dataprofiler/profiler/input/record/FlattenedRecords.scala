@@ -10,6 +10,8 @@ import FlattenedRecords.dslJson
 import uk.gov.ipt.das.dataprofiler.spark.Implicits._
 import uk.gov.ipt.das.dataprofiler.identifier.AdditionalIdentifiers
 import uk.gov.ipt.das.dataprofiler.profiler.input.record.keypreprocessor.{KeyPreProcessor, PassthroughKeyProcessor}
+import uk.gov.ipt.das.dataprofiler.profiler.input.record.notation.Notation
+import uk.gov.ipt.das.dataprofiler.profiler.input.record.notation.Notation.SquareBracketsNotation
 import uk.gov.ipt.das.dataprofiler.profiler.input.records.ProfilableRecords
 import uk.gov.ipt.das.dataprofiler.profiler.rule.ArrayQueryPath
 
@@ -81,10 +83,10 @@ object FlattenedRecords {
     .`with`(new ConfigureScala))
 
   def apply(profilableRecords: ProfilableRecords,
-            keyPreProcessor: KeyPreProcessor = PassthroughKeyProcessor()): FlattenedRecords =
+            keyPreProcessor: KeyPreProcessor = PassthroughKeyProcessor(), notation: Notation = SquareBracketsNotation): FlattenedRecords =
     FlattenedRecords(
       profilableRecords.records.map { profilableRecord =>
-        FlattenedProfilableRecord(profilableRecord, RecordFlattener(keyPreProcessor))
+        FlattenedProfilableRecord(profilableRecord, RecordFlattener(keyPreProcessor, notation))
       }
     )
 

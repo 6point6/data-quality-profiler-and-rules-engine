@@ -4,8 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import uk.gov.ipt.das.dataprofiler.profiler.input.reader.json.JsonInputReader.fromJsonStrings
 import uk.gov.ipt.das.dataprofiler.identifier.IdentifierSource
 import uk.gov.ipt.das.dataprofiler.profiler.ProfilerConfiguration
-import uk.gov.ipt.das.dataprofiler.profiler.input.reader.json.IdentifierPaths
-import uk.gov.ipt.das.dataprofiler.profiler.input.record.FlattenedRecords
+import uk.gov.ipt.das.dataprofiler.profiler.input.reader.json.{IdentifierPaths, JsonInputReader}
+import uk.gov.ipt.das.dataprofiler.profiler.input.record.keypreprocessor.PassthroughKeyProcessor
+import uk.gov.ipt.das.dataprofiler.profiler.input.record.notation.Notation
+import uk.gov.ipt.das.dataprofiler.profiler.input.record.{FlattenedProfilableRecord, FlattenedRecords, RecordFlattener}
 import uk.gov.ipt.das.dataprofiler.profiler.rule.{ArrayQueryPath, FieldBasedMask, RecordSets}
 import uk.gov.ipt.das.dataprofiler.profiler.rule.mask.OriginalValuePassthrough
 import uk.gov.ipt.das.dataprofiler.wrapper.SparkSessionTestWrapper
@@ -117,5 +119,38 @@ class JsonLookupArrayProfilingTest extends AnyFunSpec with SparkSessionTestWrapp
     assert(df.select("featurePath").tail(1).last.getString(0) === "somearray[otherVal=finder].value")
     assert(df.select("originalValue").tail(1).last.getString(0)  === "guux")
     assert(df.select("recordId").tail(1).last.getString(0)  === "RECORD0")
+  }
+  it("should make flattened profileable records with dot notation on array") {
+    val recordStr =
+      s"""{
+         |  "id": "RECORD0",
+         |  "identifier": "information",
+         |  "somearray": [
+         |    {"name": "EDWARD"},
+         |    {
+         |      "matchme": "matches",
+         |      "value": "foo",
+         |      "otherVal": "find"
+         |    },
+         |    {
+         |      "matchme": "DOESNTmatch",
+         |      "value": "bar",
+         |      "otherVal": "dontFind"
+         |    },
+         |    {
+         |      "matchme": "DOESNTmatch",
+         |      "value": "guux",
+         |      "otherVal": "dontFind"
+         |    }
+         |  ],
+         |  "valueToProfile": "THOMAS"
+         |}
+         |""".stripMargin
+
+    val result = FlattenedProfilableRecord(
+      JsonInputReader.parseString(recordStr),
+      RecordFlattener(keyPreProcessor = PassthroughKeyProcessor(), notation = Notation.SquareBracketsNotation))
+
+    println(result)
   }
 }
