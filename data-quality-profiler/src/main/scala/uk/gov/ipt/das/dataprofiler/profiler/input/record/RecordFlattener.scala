@@ -19,7 +19,7 @@ case class RecordFlattener private (keyPreProcessor: KeyPreProcessor, notation: 
       case ARRAY if (v.asArray.nonEmpty) => v.asArray.zipWithIndex.flatMap {
       case (arrV: RecordValue, index: Int) => parseValue(s"$flatPath[]", createFullyQualifiedPath(fullyQualifiedPath, index, notation), arrV, notation)
       }
-      case ARRAY if (v.asArray.isEmpty) => List(FlatValue(flatPath, fullyQualifiedPath, NullValue()))
+      case ARRAY if (v.asArray.isEmpty) => List(FlatValue(s"$flatPath[]", fullyQualifiedPath, NullValue()))
       case RECORD => parseBranch(flatPath, fullyQualifiedPath, v.asRecord, notation)
     }
 
