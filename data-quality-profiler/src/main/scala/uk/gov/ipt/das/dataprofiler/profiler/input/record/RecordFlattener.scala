@@ -17,7 +17,7 @@ case class RecordFlattener private (keyPreProcessor: KeyPreProcessor, notation: 
     v.valueType match {
       case NULL | STRING | BOOLEAN | INT | LONG | FLOAT | DOUBLE => List(FlatValue(flatPath, fullyQualifiedPath, v))
       case ARRAY if (v.asArray.nonEmpty) => v.asArray.zipWithIndex.flatMap {
-      case (arrV: RecordValue, index: Int) => parseValue(s"$flatPath[]", s"$fullyQualifiedPath[$index]", arrV, Notation.SquareBracketsNotation)
+      case (arrV: RecordValue, index: Int) => parseValue(s"$flatPath[]", createFullyQualifiedPath(fullyQualifiedPath, index, notation), arrV, notation)
       }
       case ARRAY if (v.asArray.isEmpty) => List(FlatValue(flatPath, fullyQualifiedPath, NullValue()))
       case RECORD => parseBranch(flatPath, fullyQualifiedPath, v.asRecord, notation)
