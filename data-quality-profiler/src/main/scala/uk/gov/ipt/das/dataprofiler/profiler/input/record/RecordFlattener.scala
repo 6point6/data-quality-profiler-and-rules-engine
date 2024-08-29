@@ -2,7 +2,7 @@ package uk.gov.ipt.das.dataprofiler.profiler.input.record
 
 import uk.gov.ipt.das.dataprofiler.profiler.input.record.keypreprocessor.KeyPreProcessor
 import uk.gov.ipt.das.dataprofiler.profiler.input.record.notation.Notation
-import uk.gov.ipt.das.dataprofiler.value.{ARRAY, BOOLEAN, DOUBLE, FLOAT, INT, LONG, NULL, RECORD, RecordValue, STRING}
+import uk.gov.ipt.das.dataprofiler.value.{ARRAY, BOOLEAN, DOUBLE, FLOAT, INT, LONG, NULL, NullValue, RECORD, RecordValue, STRING}
 
 case class RecordFlattener private (keyPreProcessor: KeyPreProcessor, notation: Notation) {
 
@@ -16,9 +16,10 @@ case class RecordFlattener private (keyPreProcessor: KeyPreProcessor, notation: 
   private def parseValue(flatPath: String, fullyQualifiedPath: String, v: RecordValue, notation: Notation): Seq[FlatValue] =
     v.valueType match {
       case NULL | STRING | BOOLEAN | INT | LONG | FLOAT | DOUBLE => List(FlatValue(flatPath, fullyQualifiedPath, v))
-      case ARRAY => v.asArray.zipWithIndex.flatMap { case (arrV: RecordValue, index: Int) =>
-        parseValue(s"$flatPath[]", createFullyQualifiedPath(fullyQualifiedPath, index, notation), arrV, notation)
+      case ARRAY if (v.asArray.nonEmpty) => v.asArray.zipWithIndex.flatMap {
+      case (arrV: RecordValue, index: Int) => parseValue(s"$flatPath[]", createFullyQualifiedPath(fullyQualifiedPath, index, notation), arrV, notation)
       }
+      case ARRAY if (v.asArray.isEmpty) => List(FlatValue(s"$flatPath[]", fullyQualifiedPath, NullValue()))
       case RECORD => parseBranch(flatPath, fullyQualifiedPath, v.asRecord, notation)
     }
 
